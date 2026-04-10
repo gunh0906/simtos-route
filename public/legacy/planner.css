@@ -56,20 +56,8 @@ button,input,select,summary { font:inherit; }
   box-shadow:var(--shadow);
   overflow:hidden;
 }
-.control-panel summary {
-  list-style:none;
-  cursor:pointer;
-  padding:14px 16px;
-  font-size:15px;
-  font-weight:800;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.control-panel summary::-webkit-details-marker { display:none; }
-.control-panel summary::after { content:"열기"; color:var(--muted); font-size:12px; font-weight:700; }
-.control-panel[open] summary::after { content:"닫기"; }
-.control-body { padding:0 16px 16px; display:flex; flex-direction:column; gap:12px; }
+.control-panel summary { display:none; }
+.control-body { padding:16px; display:flex; flex-direction:column; gap:12px; }
 .search-row { display:grid; grid-template-columns:minmax(0,1fr) 140px; gap:10px; }
 .field label { display:block; margin-bottom:6px; font-size:12px; font-weight:700; color:var(--muted); }
 .field input,.field select {
@@ -122,6 +110,9 @@ button:disabled { opacity:.6; cursor:default; }
 .fold summary::-webkit-details-marker { display:none; }
 .fold[open] summary { border-bottom:1px solid var(--line); background:#fff; }
 .fold-body { padding:12px; display:flex; flex-direction:column; gap:10px; }
+#resultsFold > summary { display:none; }
+#resultsFold .fold-body { padding:0; }
+#resultsFold.is-hidden { display:none; }
 .results { display:flex; flex-direction:column; gap:8px; max-height:30vh; overflow:auto; }
 .saved-meta {
   display:flex;
@@ -531,16 +522,35 @@ body.mobile-sheet-open { overflow:hidden; }
   .topbar { gap:8px; padding:8px 0 10px; }
   .brand { font-size:18px; }
   .jumpbar a { padding:9px 12px; font-size:13px; }
-  .control-panel summary { padding:12px 14px; font-size:14px; }
-  .control-body { padding:0 14px 14px; }
-  .search-row { grid-template-columns:1fr; }
-  .statusline { flex-direction:column; align-items:flex-start; }
-  .hint { text-align:left; }
-  .card { padding:12px; border-radius:18px; scroll-margin-top:286px; }
+  .control-panel {
+    border-radius:18px;
+    box-shadow:0 10px 26px rgba(15,23,42,.08);
+  }
+  .control-body { padding:12px; gap:10px; }
+  .search-row { grid-template-columns:minmax(0,1fr) 108px; align-items:end; }
+  .field label { margin-bottom:5px; }
+  .field input,
+  .field select { padding:11px 12px; }
+  .btnbar {
+    display:flex;
+    gap:8px;
+    overflow:auto hidden;
+    padding-bottom:2px;
+    margin:0 -2px;
+  }
+  .btnbar button {
+    flex:0 0 auto;
+    min-height:40px;
+    min-width:max-content;
+    padding:9px 12px;
+    white-space:nowrap;
+  }
+  .statusline { align-items:center; }
+  .hint { display:none; }
+  .card { padding:12px; border-radius:18px; scroll-margin-top:220px; }
   .card h2 { font-size:18px; }
   .map-frame { max-height:70svh; }
   .tools button { min-height:34px; font-size:12px; }
-  .fold summary { padding:11px 12px; }
   .fold-body { padding:10px; }
   .result-row { grid-template-columns:1fr; }
   .row-actions { justify-content:flex-start; }
@@ -555,7 +565,7 @@ body.mobile-sheet-open { overflow:hidden; }
   .saved-chip-text strong,
   .saved-chip-text small { max-width:120px; }
   .saved-actions { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .results { max-height:22vh; }
+  .results { max-height:min(32svh,280px); }
   .route-summary { max-height:18vh; padding:10px; }
   #savedFold,
   #routeFold { display:none; }
@@ -563,6 +573,6 @@ body.mobile-sheet-open { overflow:hidden; }
   .mobile-sheet { display:block; }
 }
 @media (max-width:480px) {
-  .btnbar { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .search-row { grid-template-columns:minmax(0,1fr) 98px; }
   .map-frame { max-height:66svh; }
 }
