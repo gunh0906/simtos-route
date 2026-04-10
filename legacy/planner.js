@@ -52,6 +52,7 @@ let booting = true;
 let routeMeta = { page1StartHall: null, page3StartHall: null, page4StartHall: null };
 const accessCache = new Map();
 let mobileSheetTab = 'saved';
+let searchResultsVisible = false;
 
 const routePages = {
   1: page1,
@@ -61,10 +62,19 @@ const routePages = {
 
 function esc(text){ return String(text).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])); }
 function closePanelOnMobile(){
-  if(controlPanel && window.innerWidth <= 720) controlPanel.open = false;
+  if(controlPanel) controlPanel.open = true;
 }
 function isMobileUI(){
   return window.innerWidth <= 720;
+}
+function hasSearchQuery(){
+  return !!(searchBox && searchBox.value.trim());
+}
+function syncSearchResultsVisibility(){
+  if(!resultsFold) return;
+  const visible = searchResultsVisible && hasSearchQuery();
+  resultsFold.classList.toggle('is-hidden', !visible);
+  resultsFold.open = visible;
 }
 function moveNode(node, parent){
   if(node && parent && node.parentElement !== parent) parent.appendChild(node);
@@ -94,7 +104,8 @@ function closeMobileSheet(force=false){
 }
 function openSearchPanel(){
   if(controlPanel) controlPanel.open = true;
-  if(resultsFold) resultsFold.open = true;
+  if(hasSearchQuery()) searchResultsVisible = true;
+  syncSearchResultsVisibility();
   if(searchBox){
     setTimeout(()=>searchBox.focus(), 60);
   }
@@ -762,6 +773,11 @@ function focusItem(item){
   if(frame){
     setTimeout(()=>{ frame.scrollTo({left:Math.max(0,p.x-frame.clientWidth/2), top:Math.max(0,p.y-frame.clientHeight/2), behavior:'smooth'}); },250);
   }
+  if(isMobileUI()){
+    searchResultsVisible = false;
+    syncSearchResultsVisibility();
+    if(searchBox) searchBox.blur();
+  }
   closePanelOnMobile();
   closeMobileSheet();
 }
@@ -1004,13 +1020,18 @@ function renderResults(){
   const matched = allItems.filter(item=>matchItem(item,q,hall));
   lastMatched = matched;
   countBox.textContent = `\uAC80\uC0C9 \uACB0\uACFC: ${matched.length}\uAC1C`;
-  if(resultsFold) resultsFold.open = !!q;
-  if(controlPanel && q) controlPanel.open = true;
   resultsEl.innerHTML = '';
   if(!q){
-    resultsEl.innerHTML = '<div class="item empty">\uC5C5\uCCB4\uBA85 \uB610\uB294 \uBD80\uC2A4\uBC88\uD638\uB97C \uC785\uB825\uD558\uC138\uC694.</div>';
+    searchResultsVisible = false;
+    syncSearchResultsVisibility();
+    if(!savedBooths.length){
+      previewItem = null;
+      renderOverlays();
+    }
     return;
   }
+  syncSearchResultsVisibility();
+  if(controlPanel) controlPanel.open = true;
   if(!matched.length){
     resultsEl.innerHTML = '<div class="item empty">\uC77C\uCE58\uD558\uB294 \uC5C5\uCCB4 \uB610\uB294 \uBD80\uC2A4\uBC88\uD638\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.</div>';
     return;
@@ -1052,8 +1073,24 @@ function renderResults(){
     resultsEl.appendChild(div);
   });
 }
-searchBox.addEventListener('input', renderResults);
-hallSelect.addEventListener('change', renderResults);
+searchBox.addEventListener('input', ()=>{
+  searchResultsVisible = hasSearchQuery();
+  renderResults();
+});
+searchBox.addEventListener('search', ()=>{
+  searchResultsVisible = hasSearchQuery();
+  renderResults();
+});
+searchBox.addEventListener('focus', ()=>{
+  if(hasSearchQuery()){
+    searchResultsVisible = true;
+    syncSearchResultsVisibility();
+  }
+});
+hallSelect.addEventListener('change', ()=>{
+  if(hasSearchQuery()) searchResultsVisible = true;
+  renderResults();
+});
 addSingleBtn.addEventListener('click', ()=>{
   if(lastMatched.length===1){
     addSaved(lastMatched[0]);
@@ -1074,7 +1111,7 @@ setMyLocationBtn.addEventListener('click', ()=>{
   renderLocationButtons();
   renderMobileDock();
   if(settingMyLocation) closeMobileSheet();
-  if(controlPanel && settingMyLocation) controlPanel.open = true;
+  if(settingMyLocation) openSearchPanel();
 });
 if(mobileLocationBtn){
   mobileLocationBtn.addEventListener('click', ()=>{

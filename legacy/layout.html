@@ -12,13 +12,13 @@
       <a href="#card-4">2전시관 (9~10홀)</a>
       <a href="#card-list">원본 업체목록</a>
     </nav>
-    <details class="control-panel" id="controlPanel">
+    <details class="control-panel" id="controlPanel" open>
       <summary>검색 · 저장 · 경로</summary>
       <div class="control-body">
         <div class="search-row">
           <div class="field">
             <label for="searchBox">업체명 또는 부스번호</label>
-            <input id="searchBox" type="text" placeholder="예: DN솔루션즈, OPEN MIND, 04A540">
+            <input id="searchBox" type="search" placeholder="예: DN솔루션즈, OPEN MIND, 04A540">
           </div>
           <div class="field">
             <label for="hallSelect">Hall 필터</label>
@@ -40,7 +40,7 @@
           <div class="hint">내 위치 지정 후 지도의 복도 중앙을 눌러 시작점을 잡을 수 있습니다.</div>
         </div>
         <div class="folds">
-          <details class="fold" id="resultsFold">
+          <details class="fold" id="resultsFold" open>
             <summary>검색 결과</summary>
             <div class="fold-body">
               <div class="results" id="results"></div>
@@ -66,7 +66,6 @@
   </header>
 
   <div class="mobile-dock" id="mobileDock">
-    <button class="mobile-dock-btn mobile-dock-side" type="button" id="mobileSearchBtn">검색</button>
     <button class="mobile-dock-btn mobile-dock-main" type="button" id="mobileSavedBtn">
       <span>저장 업체</span>
       <strong id="mobileSavedCount">0개</strong>
