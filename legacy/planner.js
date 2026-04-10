@@ -53,6 +53,7 @@ let routeMeta = { page1StartHall: null, page3StartHall: null, page4StartHall: nu
 const accessCache = new Map();
 let mobileSheetTab = 'saved';
 let searchResultsVisible = false;
+const pageZoom = {1:1,3:1,4:1};
 
 const routePages = {
   1: page1,
@@ -146,10 +147,47 @@ function syncResponsivePanels(){
     closeMobileSheet(true);
   }
   renderMobileDock();
+  applyAllMapScales();
+}
+function getFitScale(page){
+  const frame = document.getElementById(`frame-${page}`);
+  const dims = mapDims[page];
+  if(!frame || !dims) return 1;
+  return Math.min(1, frame.clientWidth / dims.w);
+}
+function getMapScale(page){
+  const map = document.getElementById(`map-${page}`);
+  const value = Number(map?.dataset.scale || 1);
+  return Number.isFinite(value) && value > 0 ? value : 1;
+}
+function applyMapScale(page, keepCenter = false){
+  const map = document.getElementById(`map-${page}`);
+  const frame = document.getElementById(`frame-${page}`);
+  const dims = mapDims[page];
+  if(!map || !frame || !dims) return;
+  const prevScale = getMapScale(page);
+  const centerX = (frame.scrollLeft + frame.clientWidth / 2) / prevScale;
+  const centerY = (frame.scrollTop + frame.clientHeight / 2) / prevScale;
+  const scale = (isMobileUI() ? getFitScale(page) : 1) * (pageZoom[page] || 1);
+  map.dataset.scale = String(scale);
+  map.style.transform = 'none';
+  map.style.width = `${Math.round(dims.w * scale)}px`;
+  requestAnimationFrame(()=>{
+    if(keepCenter){
+      frame.scrollLeft = Math.max(0, centerX * scale - frame.clientWidth / 2);
+      frame.scrollTop = Math.max(0, centerY * scale - frame.clientHeight / 2);
+    }else if(isMobileUI() && (pageZoom[page] || 1) <= 1.001){
+      frame.scrollLeft = 0;
+      frame.scrollTop = 0;
+    }
+  });
+}
+function applyAllMapScales(keepCenter = false){
+  [1,3,4].forEach(page=>applyMapScale(page, keepCenter));
 }
 function setZoom(page,scale){
-  const map = document.getElementById(`map-${page}`);
-  if(map) map.style.transform = `scale(${scale})`;
+  pageZoom[page] = scale;
+  applyMapScale(page, true);
 }
 function loadSaved(){ try{ const raw=localStorage.getItem(storageKey); const arr=raw?JSON.parse(raw):[]; return Array.isArray(arr)?arr:[]; }catch(e){ return []; } }
 function loadMyLocation(){ try{ const raw = localStorage.getItem(storageKey + "_my_location"); return raw ? JSON.parse(raw) : null; }catch(e){ return null; } }
@@ -771,9 +809,16 @@ function focusItem(item){
   const card=document.getElementById(`card-${item.page}`);
   const frame=document.getElementById(`frame-${item.page}`);
   const p=getPxPy(item);
+  const scale = getMapScale(item.page);
   if(card) card.scrollIntoView({behavior:'smooth', block:'start'});
   if(frame){
-    setTimeout(()=>{ frame.scrollTo({left:Math.max(0,p.x-frame.clientWidth/2), top:Math.max(0,p.y-frame.clientHeight/2), behavior:'smooth'}); },250);
+    setTimeout(()=>{
+      frame.scrollTo({
+        left:Math.max(0, p.x * scale - frame.clientWidth / 2),
+        top:Math.max(0, p.y * scale - frame.clientHeight / 2),
+        behavior:'smooth'
+      });
+    },250);
   }
   if(isMobileUI()){
     searchResultsVisible = false;
@@ -845,7 +890,7 @@ function setMyLocationFromClick(page, clientX, clientY){
   const frame=document.getElementById(`frame-${page}`);
   const map=document.getElementById(`map-${page}`);
   const rect = map.getBoundingClientRect();
-  const scale = (map.style.transform ? parseFloat((map.style.transform.match(/scale\(([^)]+)\)/)||[0,1])[1]) : 1);
+  const scale = getMapScale(page);
   const x = (clientX - rect.left + frame.scrollLeft) / scale;
   const y = (clientY - rect.top + frame.scrollTop) / scale;
 
@@ -956,16 +1001,17 @@ function renderSavedList(){
   });
   if(savedDetailEl){
     const activeIndex = routedItems.findIndex(item => item.booth === active.booth);
-    savedDetailEl.className = 'saved-detail';
+    const compact = isMobileUI();
+    savedDetailEl.className = `saved-detail${compact ? ' compact' : ''}`;
     savedDetailEl.innerHTML = `
       <div class="saved-detail-head">
         <div>
           <p class="saved-detail-title">${activeIndex + 1}. ${esc(active.name)}</p>
-          <div class="saved-detail-meta">${esc(active.booth)} / Hall ${esc(active.hall)} / \uC9C0\uB3C4 ${active.page}</div>
+          <div class="saved-detail-meta">${esc(active.booth)} / Hall ${esc(active.hall)}${compact ? '' : ` / \uC9C0\uB3C4 ${active.page}`}</div>
         </div>
       </div>
       <div class="saved-actions">
-        <button type="button" class="primary" data-action="focus">\uC9C0\uB3C4\uBCF4\uAE30</button>
+        <button type="button" class="primary" data-action="focus">${compact ? '\uBCF4\uAE30' : '\uC9C0\uB3C4\uBCF4\uAE30'}</button>
         <button type="button" data-action="up" ${activeIndex === 0 ? 'disabled' : ''}>\uC704\uB85C</button>
         <button type="button" data-action="down" ${activeIndex === routedItems.length - 1 ? 'disabled' : ''}>\uC544\uB798\uB85C</button>
         <button type="button" class="danger" data-action="remove">\uC0AD\uC81C</button>
@@ -1142,7 +1188,10 @@ if(mobileTabSaved){
 if(mobileTabRoute){
   mobileTabRoute.addEventListener('click', ()=>setMobileSheetTab('route'));
 }
-window.addEventListener('resize', syncResponsivePanels);
+window.addEventListener('resize', ()=>{
+  syncResponsivePanels();
+  applyAllMapScales(true);
+});
 document.addEventListener('keydown', (e)=>{
   if(e.key === 'Escape') closeMobileSheet();
 });
@@ -1154,6 +1203,7 @@ document.addEventListener('keydown', (e)=>{
 });
 
 syncResponsivePanels();
+applyAllMapScales();
 rebuildRoute();
 renderResults();
 renderLocationButtons();
