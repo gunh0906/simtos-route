@@ -39,7 +39,8 @@ button,input,select,summary { font:inherit; }
 .brand { font-size:20px; font-weight:800; letter-spacing:-0.03em; }
 .brand small { display:none; }
 .jumpbar { display:flex; gap:8px; overflow:auto; padding-bottom:2px; }
-.jumpbar a {
+.jumpbar a,
+.jumpbar button {
   flex:0 0 auto;
   padding:10px 14px;
   border:1px solid var(--line);
@@ -48,6 +49,8 @@ button,input,select,summary { font:inherit; }
   font-size:13px;
   font-weight:800;
   box-shadow:0 8px 20px rgba(15,23,42,.05);
+  color:inherit;
+  appearance:none;
 }
 .control-panel {
   border:1px solid var(--line);
@@ -386,6 +389,7 @@ button:disabled { opacity:.6; cursor:default; }
 .results::-webkit-scrollbar,
 .saved-list::-webkit-scrollbar,
 .route-summary::-webkit-scrollbar,
+.company-sheet-body::-webkit-scrollbar,
 .mobile-sheet-body::-webkit-scrollbar {
   width:0;
   height:0;
@@ -396,6 +400,7 @@ button:disabled { opacity:.6; cursor:default; }
 .results,
 .saved-list,
 .route-summary,
+.company-sheet-body,
 .mobile-sheet-body {
   scrollbar-width:none;
   -ms-overflow-style:none;
@@ -421,9 +426,86 @@ button:disabled { opacity:.6; cursor:default; }
 .list-fold[open] summary { border-bottom:1px solid var(--line); background:#fff; }
 .pdf-wrap { padding:12px; background:#fff; }
 .pdf-image { display:block; width:100%; height:auto; border:1px solid var(--line); border-radius:12px; background:#fff; }
+.company-sheet,
 .mobile-dock,
 .mobile-sheet { display:none; }
-body.mobile-sheet-open { overflow:hidden; }
+body.overlay-open { overflow:hidden; }
+.company-sheet {
+  display:block;
+  position:fixed;
+  inset:0;
+  z-index:46;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease;
+}
+.company-sheet.is-open {
+  opacity:1;
+  pointer-events:auto;
+}
+.company-sheet-backdrop {
+  position:absolute;
+  inset:0;
+  background:rgba(15,23,42,.42);
+}
+.company-sheet-panel {
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:min(1120px,calc(100% - 24px));
+  max-height:min(88svh,920px);
+  padding:14px;
+  border-radius:24px;
+  background:#fff;
+  box-shadow:0 24px 70px rgba(15,23,42,.2);
+  transform:translate(-50%,-46%);
+  transition:transform .2s ease;
+  display:flex;
+  flex-direction:column;
+}
+.company-sheet.is-open .company-sheet-panel {
+  transform:translate(-50%,-50%);
+}
+.company-sheet-head {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.company-sheet-kicker {
+  margin:0;
+  font-size:11px;
+  font-weight:800;
+  color:var(--accent);
+}
+.company-sheet-title {
+  display:block;
+  margin-top:2px;
+  font-size:18px;
+  line-height:1.2;
+}
+.company-sheet-note {
+  margin:8px 0 0;
+  font-size:13px;
+  color:var(--muted);
+}
+.company-sheet-close {
+  flex:0 0 auto;
+  min-width:60px;
+  min-height:36px;
+  border-radius:12px;
+  padding:8px 12px;
+}
+.company-sheet-body {
+  margin-top:12px;
+  max-height:calc(min(88svh,920px) - 110px);
+  overflow:auto;
+}
+#companyListHost {
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
 .mobile-dock {
   position:fixed;
   left:10px;
@@ -585,7 +667,8 @@ body.mobile-sheet-open { overflow:hidden; }
   .shell { padding:10px; }
   .topbar { gap:8px; padding:8px 0 10px; }
   .brand { font-size:18px; }
-  .jumpbar a { padding:9px 12px; font-size:13px; }
+  .jumpbar a,
+  .jumpbar button { padding:9px 12px; font-size:13px; }
   .control-panel {
     border-radius:18px;
     box-shadow:0 10px 26px rgba(15,23,42,.08);
@@ -653,7 +736,29 @@ body.mobile-sheet-open { overflow:hidden; }
   }
   .mobile-sheet-kicker { display:none; }
   .mobile-sheet-panel { border-radius:20px 20px 0 0; }
+  .company-sheet-panel {
+    left:0;
+    right:0;
+    top:auto;
+    bottom:0;
+    width:auto;
+    max-height:min(86svh,720px);
+    padding:12px 12px calc(12px + env(safe-area-inset-bottom));
+    border-radius:22px 22px 0 0;
+    transform:translateY(20px);
+  }
+  .company-sheet.is-open .company-sheet-panel { transform:translateY(0); }
+  .company-sheet-title { font-size:16px; }
+  .company-sheet-note {
+    margin-top:6px;
+    font-size:12px;
+  }
+  .company-sheet-body {
+    margin-top:10px;
+    max-height:calc(min(86svh,720px) - 102px - env(safe-area-inset-bottom));
+  }
   .mobile-dock { display:flex; }
+  .company-sheet { display:block; }
   .mobile-sheet { display:block; }
 }
 @media (max-width:480px) {

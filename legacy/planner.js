@@ -29,6 +29,13 @@ const mobileSheetBackdrop = document.getElementById('mobileSheetBackdrop');
 const mobileSheetClose = document.getElementById('mobileSheetClose');
 const mobileSheetTitle = document.getElementById('mobileSheetTitle');
 const mobileSheetKicker = document.getElementById('mobileSheetKicker');
+const companyListBtn = document.getElementById('companyListBtn');
+const companySheet = document.getElementById('companySheet');
+const companySheetBackdrop = document.getElementById('companySheetBackdrop');
+const companySheetClose = document.getElementById('companySheetClose');
+const companyListSource = document.getElementById('card-list');
+const companyListHost = document.getElementById('companyListHost');
+const companyListContent = companyListSource ? companyListSource.querySelector('.list-stack') : null;
 const mobileTabSaved = document.getElementById('mobileTabSaved');
 const mobileTabRoute = document.getElementById('mobileTabRoute');
 const mobileSavedSection = document.getElementById('mobileSavedSection');
@@ -71,6 +78,13 @@ function isMobileUI(){
 function hasSearchQuery(){
   return !!(searchBox && searchBox.value.trim());
 }
+function syncOverlayLock(){
+  const locked = !!(
+    (mobileSheet && mobileSheet.classList.contains('is-open')) ||
+    (companySheet && companySheet.classList.contains('is-open'))
+  );
+  document.body.classList.toggle('overlay-open', locked);
+}
 function syncSearchResultsVisibility(){
   if(!resultsFold) return;
   const visible = searchResultsVisible && hasSearchQuery();
@@ -79,6 +93,26 @@ function syncSearchResultsVisibility(){
 }
 function moveNode(node, parent){
   if(node && parent && node.parentElement !== parent) parent.appendChild(node);
+}
+function mountCompanyList(){
+  moveNode(companyListContent, companyListHost);
+}
+function openCompanySheet(){
+  if(!companySheet) return;
+  mountCompanyList();
+  searchResultsVisible = false;
+  syncSearchResultsVisibility();
+  closeMobileSheet(true);
+  companySheet.classList.add('is-open');
+  companySheet.setAttribute('aria-hidden','false');
+  syncOverlayLock();
+}
+function closeCompanySheet(force=false){
+  if(!companySheet) return;
+  if(!force && !companySheet.classList.contains('is-open')) return;
+  companySheet.classList.remove('is-open');
+  companySheet.setAttribute('aria-hidden','true');
+  syncOverlayLock();
 }
 function setMobileSheetTab(tab){
   mobileSheetTab = tab === 'route' ? 'route' : 'saved';
@@ -91,21 +125,23 @@ function setMobileSheetTab(tab){
 }
 function openMobileSheet(tab='saved'){
   if(!mobileSheet || !isMobileUI()) return;
+  closeCompanySheet(true);
   searchResultsVisible = false;
   syncSearchResultsVisibility();
   setMobileSheetTab(tab);
   mobileSheet.classList.add('is-open');
   mobileSheet.setAttribute('aria-hidden','false');
-  document.body.classList.add('mobile-sheet-open');
+  syncOverlayLock();
 }
 function closeMobileSheet(force=false){
   if(!mobileSheet) return;
   if(!force && !mobileSheet.classList.contains('is-open')) return;
   mobileSheet.classList.remove('is-open');
   mobileSheet.setAttribute('aria-hidden','true');
-  document.body.classList.remove('mobile-sheet-open');
+  syncOverlayLock();
 }
 function openSearchPanel(){
+  closeCompanySheet();
   if(controlPanel) controlPanel.open = true;
   if(hasSearchQuery()) searchResultsVisible = true;
   syncSearchResultsVisibility();
@@ -1176,11 +1212,20 @@ if(mobileSearchBtn){
 if(mobileSavedBtn){
   mobileSavedBtn.addEventListener('click', ()=>openMobileSheet('saved'));
 }
+if(companyListBtn){
+  companyListBtn.addEventListener('click', ()=>openCompanySheet());
+}
 if(mobileSheetBackdrop){
   mobileSheetBackdrop.addEventListener('click', ()=>closeMobileSheet());
 }
 if(mobileSheetClose){
   mobileSheetClose.addEventListener('click', ()=>closeMobileSheet());
+}
+if(companySheetBackdrop){
+  companySheetBackdrop.addEventListener('click', ()=>closeCompanySheet());
+}
+if(companySheetClose){
+  companySheetClose.addEventListener('click', ()=>closeCompanySheet());
 }
 if(mobileTabSaved){
   mobileTabSaved.addEventListener('click', ()=>setMobileSheetTab('saved'));
@@ -1193,7 +1238,10 @@ window.addEventListener('resize', ()=>{
   applyAllMapScales(true);
 });
 document.addEventListener('keydown', (e)=>{
-  if(e.key === 'Escape') closeMobileSheet();
+  if(e.key === 'Escape'){
+    closeMobileSheet();
+    closeCompanySheet();
+  }
 });
 [1,3,4].forEach(page=>{
   document.getElementById(`map-${page}`).addEventListener('click', (e)=>{
@@ -1202,6 +1250,7 @@ document.addEventListener('keydown', (e)=>{
   });
 });
 
+mountCompanyList();
 syncResponsivePanels();
 applyAllMapScales();
 rebuildRoute();
