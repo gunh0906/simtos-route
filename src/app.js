@@ -1,4 +1,9 @@
 const legacyBase = `${import.meta.env.BASE_URL}legacy`
+const legacyVersion = '20260410-2'
+
+function withLegacyVersion(file) {
+  return `${legacyBase}/${file}?v=${legacyVersion}`
+}
 
 function ensureLegacyCss() {
   const existing = document.getElementById('legacy-planner-style')
@@ -7,7 +12,7 @@ function ensureLegacyCss() {
   const link = document.createElement('link')
   link.id = 'legacy-planner-style'
   link.rel = 'stylesheet'
-  link.href = `${legacyBase}/planner.css`
+  link.href = withLegacyVersion('planner.css')
   document.head.appendChild(link)
 }
 
@@ -17,7 +22,7 @@ function injectLegacyScript() {
 
   const script = document.createElement('script')
   script.id = 'legacy-planner-script'
-  script.src = `${legacyBase}/planner.js`
+  script.src = withLegacyVersion('planner.js')
   document.body.appendChild(script)
 }
 
@@ -32,7 +37,7 @@ export async function mountApp(target) {
   if (!legacyRoot) return
 
   ensureLegacyCss()
-  const response = await fetch(`${legacyBase}/layout.html`)
+  const response = await fetch(withLegacyVersion('layout.html'), { cache: 'no-store' })
   if (!response.ok) {
     throw new Error(`Failed to load legacy layout: ${response.status}`)
   }
