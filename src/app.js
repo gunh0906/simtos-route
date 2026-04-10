@@ -24,11 +24,6 @@ function injectLegacyScript() {
 export async function mountApp(target) {
   target.innerHTML = `
     <div class="app-shell">
-      <div class="app-banner">
-        <p>SIMTOS \uBD80\uC2A4 \uACBD\uB85C \uC6F9\uC571</p>
-        <h1>\uB2E8\uC77C HTML\uC744 \uC6F9\uC571 \uAD6C\uC870\uB85C \uC62E\uAE34 \uCCAB \uBC84\uC804</h1>
-        <span>\uB2E4\uC74C \uB2E8\uACC4\uC5D0\uC11C \uAC80\uC0C9, \uC800\uC7A5\uC5C5\uCCB4, \uACBD\uB85C, \uC9C0\uB3C4 \uAE30\uB2A5\uC744 \uAC1C\uBCC4 \uBAA8\uB4C8\uB85C \uB354 \uCABC\uAC24 \uC218 \uC788\uC2B5\uB2C8\uB2E4.</span>
-      </div>
       <div id="legacy-app-root"></div>
     </div>
   `
