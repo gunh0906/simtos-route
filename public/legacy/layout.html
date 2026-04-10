@@ -15,19 +15,31 @@
     <details class="control-panel" id="controlPanel" open>
       <summary>검색 · 저장 · 경로</summary>
       <div class="control-body">
-        <div class="search-row">
-          <div class="field">
-            <label for="searchBox">업체명 또는 부스번호</label>
-            <input id="searchBox" type="search" placeholder="예: DN솔루션즈, OPEN MIND, 04A540">
+        <div class="search-shell">
+          <div class="search-row">
+            <div class="field">
+              <label for="searchBox">업체명 또는 부스번호</label>
+              <input id="searchBox" type="search" placeholder="예: DN솔루션즈, OPEN MIND, 04A540">
+            </div>
+            <div class="field">
+              <label for="hallSelect">Hall 필터</label>
+              <select id="hallSelect">
+                <option value="">전체</option>
+                <option value="01">Hall 1</option><option value="02">Hall 2</option><option value="03">Hall 3</option><option value="04">Hall 4</option><option value="05">Hall 5</option>
+                <option value="07">Hall 7</option><option value="08">Hall 8</option><option value="09">Hall 9</option><option value="10">Hall 10</option>
+              </select>
+            </div>
           </div>
-          <div class="field">
-            <label for="hallSelect">Hall 필터</label>
-            <select id="hallSelect">
-              <option value="">전체</option>
-              <option value="01">Hall 1</option><option value="02">Hall 2</option><option value="03">Hall 3</option><option value="04">Hall 4</option><option value="05">Hall 5</option>
-              <option value="07">Hall 7</option><option value="08">Hall 8</option><option value="09">Hall 9</option><option value="10">Hall 10</option>
-            </select>
+          <div class="statusline">
+            <div class="count" id="countBox">검색 결과: 0개</div>
+            <div class="hint">내 위치 지정 후 지도의 복도 중앙을 눌러 시작점을 잡을 수 있습니다.</div>
           </div>
+          <details class="fold" id="resultsFold" open>
+            <summary>검색 결과</summary>
+            <div class="fold-body">
+              <div class="results" id="results"></div>
+            </div>
+          </details>
         </div>
         <div class="btnbar">
           <button class="primary" type="button" id="addSingleBtn">현재 결과 저장</button>
@@ -35,17 +47,7 @@
           <button type="button" id="setMyLocationBtn">내 위치 지정</button>
           <button class="danger" type="button" id="clearSavedBtn">전체 삭제</button>
         </div>
-        <div class="statusline">
-          <div class="count" id="countBox">검색 결과: 0개</div>
-          <div class="hint">내 위치 지정 후 지도의 복도 중앙을 눌러 시작점을 잡을 수 있습니다.</div>
-        </div>
         <div class="folds">
-          <details class="fold" id="resultsFold" open>
-            <summary>검색 결과</summary>
-            <div class="fold-body">
-              <div class="results" id="results"></div>
-            </div>
-          </details>
           <details class="fold" id="savedFold">
             <summary>저장 업체</summary>
             <div class="fold-body">

@@ -90,6 +90,8 @@ function setMobileSheetTab(tab){
 }
 function openMobileSheet(tab='saved'){
   if(!mobileSheet || !isMobileUI()) return;
+  searchResultsVisible = false;
+  syncSearchResultsVisibility();
   setMobileSheetTab(tab);
   mobileSheet.classList.add('is-open');
   mobileSheet.setAttribute('aria-hidden','false');
